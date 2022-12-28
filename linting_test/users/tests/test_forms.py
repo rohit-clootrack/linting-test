@@ -1,6 +1,4 @@
-"""
-Module for all Form Tests.
-"""
+"""Module for all Form Tests."""
 from django.utils.translation import gettext_lazy as _
 
 from linting_test.users.forms import UserAdminCreationForm
@@ -8,9 +6,7 @@ from linting_test.users.models import User
 
 
 class TestUserAdminCreationForm:
-    """
-    Test class for all tests related to the UserAdminCreationForm
-    """
+    """Test class for all tests related to the UserAdminCreationForm"""
 
     def test_username_validation_error_msg(self, user: User):
         """
