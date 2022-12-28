@@ -6,7 +6,8 @@ class UsersConfig(AppConfig):
     name = "linting_test.users"
     verbose_name = _("Users")
 
-    def ready(self):
+    @staticmethod
+    def ready():
         try:
             import linting_test.users.signals  # noqa F401
         except ImportError:

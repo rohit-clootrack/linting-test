@@ -7,10 +7,12 @@ from django.http import HttpRequest
 
 
 class AccountAdapter(DefaultAccountAdapter):
-    def is_open_for_signup(self, request: HttpRequest):
+    @staticmethod
+    def is_open_for_signup(request: HttpRequest):
         return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
-    def is_open_for_signup(self, request: HttpRequest, sociallogin: Any):
+    @staticmethod
+    def is_open_for_signup(request: HttpRequest, sociallogin: Any):
         return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
