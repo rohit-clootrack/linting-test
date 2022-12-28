@@ -53,7 +53,13 @@ class UserInfoView:
     permanent = False
 
     def get(self):
-        return {"success": True}
+        variable = None
+        if variable == None:
+            return {"success": False}
+        if 1:
+            return {"success": True}
+        else:
+            print("hello")
 
 
 user_get = UserInfoView.as_view()
