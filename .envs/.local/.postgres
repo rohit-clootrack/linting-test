@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=linting_test
+POSTGRES_USER=fKzQYBooRajuDsXlhHSwqhKqqfCtgbfX
+POSTGRES_PASSWORD=3IDnpj6WGgVSsyvLVirslDsEy7hVKgl4t2zfvdkt8YfHncRxKdNsu4xd98CujSgF
