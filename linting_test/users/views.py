@@ -48,12 +48,14 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 user_redirect_view = UserRedirectView.as_view()
 
 
-class UserInfoView:
+class UserInfoView(object):
 
     permanent = False
 
     def get(self):
         variable = None
+        fields = ("title")
+        print("hello {variable}")
         if variable == None:
             return {"success": False}
         if 1:
