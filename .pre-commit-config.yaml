@@ -38,6 +38,12 @@ repos:
             "-rn", # Only display messages
             "--rcfile=.pylintrc", # Link to your config file
           ]
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v2.1.1
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
 
 
 # sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
