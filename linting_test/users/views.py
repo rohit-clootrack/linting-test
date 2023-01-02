@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -35,9 +37,6 @@ class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
 
 
 user_update_view = UserUpdateView.as_view()
-
-
-from dataclasses import dataclass
 
 
 @dataclass
