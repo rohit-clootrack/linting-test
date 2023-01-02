@@ -15,11 +15,6 @@ repos:
       - id: pyupgrade
         args: [--py310-plus]
 
-  - repo: https://github.com/psf/black
-    rev: 22.12.0
-    hooks:
-      - id: black
-
   - repo: https://github.com/PyCQA/isort
     rev: 5.11.4
     hooks:
@@ -31,6 +26,19 @@ repos:
       - id: flake8
         args: ["--config=setup.cfg"]
         additional_dependencies: [flake8-isort]
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        args:
+          [
+            "-rn", # Only display messages
+            "--rcfile=.pylintrc", # Link to your config file
+          ]
+
 
 # sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
 ci:

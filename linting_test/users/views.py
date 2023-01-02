@@ -37,12 +37,28 @@ class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
 user_update_view = UserUpdateView.as_view()
 
 
+from dataclasses import dataclass
+
+
+@dataclass
+class Spell:
+    name: str
+    is_awesome: bool
+
+
 class UserRedirectView(LoginRequiredMixin, RedirectView):
 
-    permanent = False
+    permanent = (False,)
 
     def get_redirect_url(self):
         return reverse("users:detail", kwargs={"username": self.request.user.username})
+
+    def sourcery(self, spellbook: list[Spell]) -> list[Spell]:
+        result = []
+        for spell in spellbook:
+            if spell.is_awesome:
+                result.append(spell)
+        return result
 
 
 user_redirect_view = UserRedirectView.as_view()
