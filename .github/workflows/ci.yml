@@ -10,6 +10,14 @@ concurrency:
 jobs:
   linter:
     runs-on: ubuntu-latest
+    env:
+      USE_DOCKER: yes
+      IPYTHONDIR: /app/.ipython
+      REDIS_URL: redis://redis:6379/0
+      CELERY_FLOWER_USER: YkVOpqFwlLgmgTqDUHaQDmVfqWlcztpG
+      CELERY_FLOWER_PASSWORD: 8SFRW5vlH6rKbjsKP5rrZk2GmoOdH8f45hixDoJ6LoIjttH3CBfoOqPjIndWZLnm
+      CELERY_BROKER_URL: redis://0.0.0.0:6379/0
+      DATABASE_URL: postgres://postgres:fKzQYBooRajuDsXlhHSwqhKqqfCtgbfX@0.0.0.0:1233/asaasas
     steps:
 
       - name: Checkout Code Repository
@@ -18,11 +26,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
-          cache: pip
-          cache-dependency-path: |
-            requirements/base.txt
-            requirements/local.txt
+          python-version: "3.9"
+      - run: |
+          pip install -r requirements/local.txt
+          export $(cat .envs/.local/.postgres)
+          export $(cat .envs/.local/.django)
       - id: file_changes
         uses: trilom/file-changes-action@v1.2.3
         with:

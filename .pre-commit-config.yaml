@@ -25,11 +25,6 @@ repos:
     hooks:
       - id: isort
 
-  - repo: https://github.com/jendrikseipp/vulture
-    rev: "v2.6" # or any later Vulture version
-    hooks:
-      - id: vulture
-
   - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
     hooks:
