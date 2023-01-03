@@ -54,7 +54,7 @@ class UserInfoView(LoginRequiredMixin, RedirectView):
 
     def get(self):
         variable = None
-        print("hello {variable}")
+        print(f"hello {variable}")
         if variable is None:
             return {"success": False}
         if 1:
