@@ -11,11 +11,7 @@ from django.urls import reverse
 from linting_test.users.forms import UserAdminChangeForm
 from linting_test.users.models import User
 from linting_test.users.tests.factories import UserFactory
-from linting_test.users.views import (
-    UserRedirectView,
-    UserUpdateView,
-    user_detail_view,
-)
+from linting_test.users.views import UserRedirectView, UserUpdateView, user_detail_view
 
 pytestmark = pytest.mark.django_db
 
