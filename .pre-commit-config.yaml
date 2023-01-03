@@ -35,11 +35,11 @@ repos:
   - repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
     rev: v1.0.5
     hooks:
-    -   id: python-bandit-vulnerability-check
+      - id: python-bandit-vulnerability-check
         args: [--skip, "B101", --recursive, clumper]
 
-
-  - repo: local
+  - repo: https://github.com/pre-commit/mirrors-pylint
+    rev: v3.0.0a5
     hooks:
       - id: pylint
         name: pylint
