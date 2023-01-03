@@ -24,6 +24,7 @@ flake8==6.0.0  # https://github.com/PyCQA/flake8
 flake8-isort==5.0.3  # https://github.com/gforcada/flake8-isort
 coverage==7.0.1  # https://github.com/nedbat/coveragepy
 black==22.12.0  # https://github.com/psf/black
+pylint==2.15.9 # https://github.com/PyCQA/pylint
 pylint-django==2.5.3  # https://github.com/PyCQA/pylint-django
 pylint-celery==0.3  # https://github.com/PyCQA/pylint-celery
 pre-commit==2.21.0  # https://github.com/pre-commit/pre-commit
