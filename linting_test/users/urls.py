@@ -2,9 +2,9 @@ from django.urls import path
 
 from linting_test.users.views import (
     user_detail_view,
+    user_get,
     user_redirect_view,
     user_update_view,
-    user_get,
 )
 
 app_name = "users"
