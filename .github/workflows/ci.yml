@@ -10,6 +10,14 @@ concurrency:
 jobs:
   linter:
     runs-on: ubuntu-latest
+    env:
+      USE_DOCKER: yes
+      IPYTHONDIR: /app/.ipython
+      REDIS_URL: redis://redis:6379/0
+      CELERY_FLOWER_USER: YkVOpqFwlLgmgTqDUHaQDmVfqWlcztpG
+      CELERY_FLOWER_PASSWORD: 8SFRW5vlH6rKbjsKP5rrZk2GmoOdH8f45hixDoJ6LoIjttH3CBfoOqPjIndWZLnm
+      CELERY_BROKER_URL: redis://0.0.0.0:6379/0
+      DATABASE_URL: postgres://postgres:fKzQYBooRajuDsXlhHSwqhKqqfCtgbfX@0.0.0.0:1233/asaasas
     steps:
 
       - name: Checkout Code Repository
