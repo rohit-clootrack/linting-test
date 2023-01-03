@@ -331,3 +331,4 @@ linting_test/media/
 .env
 .envs/*
 !.envs/.local/
+.idea/*
