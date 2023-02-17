@@ -116,7 +116,9 @@ class TableStore(TimeStampedModel):
 
 
 class TableSchema(TimeStampedModel):
-    table = models.ForeignKey(TableStore, on_delete=models.CASCADE)
+    table = models.ForeignKey(
+        TableStore, on_delete=models.CASCADE, related_name="table_schema"
+    )
     column_name = models.CharField(max_length=512)
     type = models.CharField(max_length=256, choices=TableSchemaType.choices())
     nullable = models.BooleanField()
@@ -131,7 +133,9 @@ class TableauPrepStore(TimeStampedModel):
 
 
 class TableauPrepStoreParam(TimeStampedModel):
-    prep_flow = models.ForeignKey(TableauPrepStore, on_delete=models.CASCADE)
+    prep_flow = models.ForeignKey(
+        TableauPrepStore, on_delete=models.CASCADE, related_name="prep_store_param"
+    )
     name = models.CharField()
     type = models.CharField(max_length=256, choices=PrepStoreParamType.choices())
     reference_id = models.CharField(max_length=64)
@@ -140,8 +144,10 @@ class TableauPrepStoreParam(TimeStampedModel):
 class Template(TimeStampedModel):
     name = models.CharField()
     type = models.CharField()
-    filepath = models.URLField(null=False)
-    project = models.ForeignKey(TableauProjects, on_delete=models.CASCADE)
+    filepath = models.URLField()
+    project = models.ForeignKey(
+        TableauProjects, on_delete=models.CASCADE, related_name="template"
+    )
     data_sources = ArrayField(models.CharField(max_length=512))
     summary = models.TextField()
     pre_processing_scripts = ArrayField(
@@ -155,11 +161,13 @@ class Template(TimeStampedModel):
 
 
 class VizReport(TimeStampedModel):
-    project = models.ForeignKey(TableauProjects, on_delete=models.CASCADE)
+    project = models.ForeignKey(
+        TableauProjects, on_delete=models.CASCADE, related_name="viz_report"
+    )
     beagle_report_id = models.IntegerField(null=True, blank=True)
-    display_name = models.CharField(max_length=1024)
-    title = models.CharField(max_length=1024)
-    url = models.URLField(null=True, blank=True)
+    display_name = models.CharField(max_length=512)
+    title = models.CharField(max_length=512)
+    url = models.URLField(default="", blank=True)
     is_edit_allowed = models.BooleanField(default=False)
     refresh_in_progress = models.BooleanField(default=False)
     is_refresh_insights_required = models.BooleanField(default=False)
@@ -169,22 +177,30 @@ class VizReport(TimeStampedModel):
 
 
 class VizWorkbook(TimeStampedModel):
-    report = models.ForeignKey(VizReport, on_delete=models.CASCADE)
-    name = models.CharField(max_length=1024)
-    template = models.ForeignKey(Template, on_delete=models.CASCADE)
+    report = models.ForeignKey(
+        VizReport, on_delete=models.CASCADE, related_name="viz_workbook"
+    )
+    name = models.CharField(max_length=512)
+    template = models.ForeignKey(
+        Template, on_delete=models.CASCADE, related_name="viz_workbook"
+    )
 
 
 class VizDashboard(TimeStampedModel):
-    workbook = models.ForeignKey(VizWorkbook, on_delete=models.CASCADE)
-    name = models.CharField(max_length=1024)
-    url = models.URLField(null=True, blank=True)
-    sequence_no = models.IntegerField(null=True)
+    workbook = models.ForeignKey(
+        VizWorkbook, on_delete=models.CASCADE, related_name="viz_dashboard"
+    )
+    name = models.CharField(max_length=512)
+    url = models.URLField(default="", blank=True)
+    sequence_no = models.IntegerField(null=True, blank=True)
     external_filter_config = JSONField(default=dict, blank=True)
 
 
 class VizDashboardFilter(TimeStampedModel):
-    dashboard = models.ForeignKey(VizDashboard, on_delete=models.CASCADE)
-    display_name = models.CharField(max_length=1024)
+    dashboard = models.ForeignKey(
+        VizDashboard, on_delete=models.CASCADE, related_name="viz_dashboard_filter"
+    )
+    display_name = models.CharField(max_length=512)
     filter_column_name = models.CharField(
         max_length=256, choices=FilterName.choices(), blank=True
     )
@@ -194,11 +210,13 @@ class VizDashboardFilter(TimeStampedModel):
     filter_type = models.CharField(
         max_length=256, choices=FilterType.choices(), blank=True
     )
-    sequence_no = models.IntegerField(null=True)
+    sequence_no = models.IntegerField(null=True, blank=True)
 
 
 class VizDashboardParam(TimeStampedModel):
-    dashboard = models.ForeignKey(VizDashboard, on_delete=models.CASCADE)
-    internal_name = models.CharField(max_length=1024)
-    display_name = models.CharField(max_length=1024)
+    dashboard = models.ForeignKey(
+        VizDashboard, on_delete=models.CASCADE, related_name="viz_dashboard_param"
+    )
+    internal_name = models.CharField(max_length=512)
+    display_name = models.CharField(max_length=512)
     values = ArrayField(models.CharField(max_length=512))
