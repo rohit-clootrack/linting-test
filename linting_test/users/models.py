@@ -13,6 +13,10 @@ from django.utils.translation import gettext_lazy as _
 from django_bulk_update.manager import BulkUpdateManager
 
 
+class ReportModel(TimeStampedModel):
+    name = models.CharField(max_length=256, db_index=True, unique=True)
+
+
 class User(AbstractUser):
     """
     Default custom user model for Linting-test.
@@ -35,30 +39,37 @@ class User(AbstractUser):
         return reverse("users:detail", kwargs={"username": self.username})
 
 
+class TimeStampedModel(Model):
+    created_on = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+    class Meta:
+        abstract = True
+
+
 class Choices(Enum):
     @classmethod
     def choices(cls):
         return tuple((key.value, key.name) for key in cls)
 
 
-class FilterName(Choices):
+class FilterColumnName(Choices):
     L1 = "L1"
     L2 = "L2"
     BRAND = "BRAND"
     PRICE_RANGE = "PRICE_RANGE"
 
 
-class InternalFilterName(Choices):
-    FILTER_1 = "FILTER_1"
-    FILTER_2 = "FILTER_2"
-    FILTER_3 = "FILTER_3"
-
-
-class FilterType(Choices):
+class FilterSelectionType(Choices):
     SINGLE_SELECT = "SINGLE_SELECT "
     MULTI_SELECT = "MULTI_SELECT"
     DATE_RANGE = "DATE_RANGE"
     RANGE = "RANGE"
+
+
+class FilterType(Choices):
+    DEFAULT = "DEFAULT"
+    CUSTOM = "CUSTOM"
 
 
 class TableType(Choices):
@@ -66,7 +77,13 @@ class TableType(Choices):
     CUSTOM_TABLE = "CUSTOM_TABLE"
 
 
-class TableSchemaType(Choices):
+class DataSourceOrigin(Choices):
+    CLUSTERING = "CLUSTERING"
+    ANALYSIS_MODULE_1 = "ANALYSIS_MODULE_1"
+    ANALYSIS_MODULE_2 = "ANALYSIS_MODULE_2"
+
+
+class TableSchemaDataType(Choices):
     CHAR = "CHAR"
     INT = "INT"
     FLOAT = "FLOAT"
@@ -74,6 +91,15 @@ class TableSchemaType(Choices):
 
 
 class TablePrepStoreStatus(Choices):
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    QC = "QC"
+    ARCHIVED = "ARCHIVED"
+    DELETED = "DELETED"
+
+
+class TemplateStoreStatus(Choices):
+    DRAFT = "DRAFT"
     PUBLISHED = "PUBLISHED"
     QC = "QC"
     ARCHIVED = "ARCHIVED"
@@ -83,6 +109,17 @@ class TablePrepStoreStatus(Choices):
 class PrepStoreParamType(Choices):
     INPUT_PARAM = "INPUT_PARAM"
     OUTPUT_PARAM = "OUTPUT_PARAM"
+
+
+class TemplateType(Choices):
+    CUSTOM = "CUSTOM"
+    STANDARD = "STANDARD"
+
+
+# TODO: insert correct preprocessing names
+class PreProcessingScript(Choices):
+    XYZ = "XYZ"
+    ABC = "ABC"
 
 
 class TimeStampedModel(Model):
@@ -110,112 +147,112 @@ class TableStore(TimeStampedModel):
     name = models.CharField(max_length=128)
     description = models.TextField()
     type = models.CharField(max_length=128, choices=TableType.choices())
-    table_source = models.CharField(
-        max_length=256, default="", blank=True
-    )  # custom input vs analysis input
+    data_source_origin = models.CharField(
+        max_length=256, default="", blank=True, choices=DataSourceOrigin.choices()
+    )
+    deleted = models.BooleanField(default=False)
 
 
 class TableSchema(TimeStampedModel):
     table = models.ForeignKey(
-        TableStore, on_delete=models.CASCADE, related_name="table_schema"
+        TableStore, on_delete=models.CASCADE, related_name="table_schemas"
     )
     column_name = models.CharField(max_length=512)
-    type = models.CharField(max_length=256, choices=TableSchemaType.choices())
-    nullable = models.BooleanField()
+    type = models.CharField(max_length=64, choices=TableSchemaDataType.choices())
+    nullable = models.BooleanField(default=False)
     is_filter_column = models.BooleanField(default=True)
 
 
 class TableauPrepStore(TimeStampedModel):
     name = models.CharField(max_length=512)
     description = models.TextField()
-    reference_id = models.CharField(max_length=64)
-    status = models.CharField(max_length=256, choices=TablePrepStoreStatus.choices())
+    filepath = models.URLField()
+    flow_id = models.CharField(max_length=64)
+    status = models.CharField(max_length=64, choices=TablePrepStoreStatus.choices())
 
 
 class TableauPrepStoreParam(TimeStampedModel):
-    prep_flow = models.ForeignKey(
-        TableauPrepStore, on_delete=models.CASCADE, related_name="prep_store_param"
-    )
-    name = models.CharField()
-    type = models.CharField(max_length=256, choices=PrepStoreParamType.choices())
-    reference_id = models.CharField(max_length=64)
-
-
-class Template(TimeStampedModel):
-    name = models.CharField()
-    type = models.CharField()
-    filepath = models.URLField()
-    project = models.ForeignKey(
-        TableauProjects, on_delete=models.CASCADE, related_name="template"
-    )
-    data_sources = ArrayField(models.CharField(max_length=512))
-    summary = models.TextField()
-    pre_processing_scripts = ArrayField(
-        models.CharField(max_length=256, choices=FilterType.choices(), blank=True)
-    )
-    input_tables = ArrayField(models.ForeignKey(TableStore, on_delete=models.CASCADE))
-    prep_flows = ArrayField(
-        models.ForeignKey(TableauPrepStore, on_delete=models.CASCADE)
-    )
-    master_flow = models.ForeignKey(TableauPrepStore, on_delete=models.CASCADE)
-
-
-class VizReport(TimeStampedModel):
-    project = models.ForeignKey(
-        TableauProjects, on_delete=models.CASCADE, related_name="viz_report"
-    )
-    beagle_report_id = models.IntegerField(null=True, blank=True)
-    display_name = models.CharField(max_length=512)
-    title = models.CharField(max_length=512)
-    url = models.URLField(default="", blank=True)
-    is_edit_allowed = models.BooleanField(default=False)
-    refresh_in_progress = models.BooleanField(default=False)
-    is_refresh_insights_required = models.BooleanField(default=False)
-    is_accessible_to_user = models.BooleanField(default=False)
-    latest_refresh_time = models.DateTimeField(blank=True, null=True)
-    last_processing_time = models.FloatField(null=True, blank=True)
-
-
-class VizWorkbook(TimeStampedModel):
-    report = models.ForeignKey(
-        VizReport, on_delete=models.CASCADE, related_name="viz_workbook"
+    prep_store = models.ForeignKey(
+        TableauPrepStore, on_delete=models.CASCADE, related_name="prep_store_params"
     )
     name = models.CharField(max_length=512)
-    template = models.ForeignKey(
-        Template, on_delete=models.CASCADE, related_name="viz_workbook"
+    type = models.CharField(max_length=64, choices=PrepStoreParamType.choices())
+    flow_param_id = models.CharField(max_length=64)
+
+
+class TemplateStore(TimeStampedModel):
+    project_name = models.CharField(max_length=512, blank=True, default="")
+    name = models.CharField(max_length=512)
+    type = models.CharField(max_length=64, choices=TemplateType.choices())
+    filepath = models.URLField()
+    summary = models.TextField()
+    deleted = models.BooleanField(default=False)
+    pre_processing_scripts = ArrayField(
+        models.CharField(
+            max_length=128, choices=PreProcessingScript.choices(), blank=True
+        )
+    )
+    input_tables = models.ManyToManyField(
+        TableStore, related_name="input_table_template_stores"
+    )
+    prep_flows = models.ManyToManyField(
+        TableauPrepStore, related_name="prep_flow_template_stores"
+    )
+    master_flow = models.ForeignKey(
+        TableauPrepStore,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="master_flow_template_stores",
+    )
+    status = models.CharField(
+        max_length=64, choices=TemplateStoreStatus.choices(), blank=True
+    )
+    qc_reports = models.ManyToManyField(
+        ReportModel, related_name="qc_reports_template_stores"
+    )
+    qc_approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="qc_approved_by_template_stores",
+    )
+    last_modified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="last_modified_by_template_stores",
     )
 
 
 class VizDashboard(TimeStampedModel):
-    workbook = models.ForeignKey(
-        VizWorkbook, on_delete=models.CASCADE, related_name="viz_dashboard"
+    template = models.ForeignKey(
+        TemplateStore, on_delete=models.CASCADE, related_name="viz_dashboards"
     )
     name = models.CharField(max_length=512)
-    url = models.URLField(default="", blank=True)
-    sequence_no = models.IntegerField(null=True, blank=True)
-    external_filter_config = JSONField(default=dict, blank=True)
+    description = models.TextField()
+    allow_parameters = models.BooleanField()
 
 
 class VizDashboardFilter(TimeStampedModel):
     dashboard = models.ForeignKey(
-        VizDashboard, on_delete=models.CASCADE, related_name="viz_dashboard_filter"
+        VizDashboard, on_delete=models.CASCADE, related_name="viz_dashboard_filters"
     )
     display_name = models.CharField(max_length=512)
     filter_column_name = models.CharField(
-        max_length=256, choices=FilterName.choices(), blank=True
+        max_length=64, choices=FilterColumnName.choices(), blank=True
     )
-    internal_filter_name = models.CharField(
-        max_length=256, choices=InternalFilterName.choices(), blank=True
-    )
+    internal_filter_name = models.CharField(max_length=64, blank=True)
     filter_type = models.CharField(
-        max_length=256, choices=FilterType.choices(), blank=True
+        max_length=64, choices=FilterType.choices(), blank=True
     )
-    sequence_no = models.IntegerField(null=True, blank=True)
+    filter_selection_type = models.CharField(
+        max_length=64, choices=FilterSelectionType.choices(), blank=True
+    )
 
 
 class VizDashboardParam(TimeStampedModel):
     dashboard = models.ForeignKey(
-        VizDashboard, on_delete=models.CASCADE, related_name="viz_dashboard_param"
+        VizDashboard, on_delete=models.CASCADE, related_name="viz_dashboard_params"
     )
     internal_name = models.CharField(max_length=512)
     display_name = models.CharField(max_length=512)
